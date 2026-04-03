@@ -48,30 +48,30 @@ namespace NaninovelPostProcess
             LuminanceContribution = parameters?.ElementAtOrDefault(5).AsInvariantFloat() ?? defaultluminanceContribution;
         }
 
-        public async UniTask AwaitSpawn(AsyncToken asyncToken = default)
+        public async Awaitable AwaitSpawn(AsyncToken asyncToken = default)
         {
             CompleteTweens();
             var duration = asyncToken.Completed ? 0 : Duration;
             await ChangeGrainAsync(duration, VolumeWeight, Colored, Intensity, Size, LuminanceContribution, asyncToken);
         }
 
-        public async UniTask ChangeGrainAsync(float duration, float volumeWeight, bool colored, float intensity, float size, float luminanceContribution, AsyncToken asyncToken = default)
+        public async Awaitable ChangeGrainAsync(float duration, float volumeWeight, bool colored, float intensity, float size, float luminanceContribution, AsyncToken asyncToken = default)
         {
-            var tasks = new List<UniTask>();
+            var tasks = new List<Awaitable>();
             if (Volume.weight != volumeWeight) tasks.Add(ChangeVolumeWeightAsync(volumeWeight, duration, asyncToken));
             grain.colored.value = colored;
             if (grain.intensity.value != intensity) tasks.Add(ChangeIntensityAsync(intensity, duration, asyncToken));
             if (grain.size.value != size) tasks.Add(ChangeSizeAsync(size, duration, asyncToken));
             if (grain.lumContrib.value != luminanceContribution) tasks.Add(ChangeLuminanceContributionAsync(luminanceContribution, duration, asyncToken));
-            await UniTask.WhenAll(tasks);
+            await Async.All(tasks);
         }
 
         protected override void CompleteTweens()
         {
-            if (volumeWeightTweener.Running) volumeWeightTweener.CompleteInstantly();
-            if (intensityTweener.Running) intensityTweener.CompleteInstantly();
-            if (sizeTweener.Running) sizeTweener.CompleteInstantly();
-            if (luminanceContributionTweener.Running) luminanceContributionTweener.CompleteInstantly();
+            if (volumeWeightTweener.Running) volumeWeightTweener.Complete();
+            if (intensityTweener.Running) intensityTweener.Complete();
+            if (sizeTweener.Running) sizeTweener.Complete();
+            if (luminanceContributionTweener.Running) luminanceContributionTweener.Complete();
         }
 
         protected override void Awake()
@@ -81,19 +81,19 @@ namespace NaninovelPostProcess
             grain.SetAllOverridesTo(true);
         }
 
-        private async UniTask ChangeIntensityAsync(float intensity, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeIntensityAsync(float intensity, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await intensityTweener.RunAwaitable(new FloatTween(grain.intensity.value, intensity, new(duration, scale:IgnoreTimescale), x => grain.intensity.value = x), asyncToken, grain);
+            if (duration > 0) await intensityTweener.Run(new FloatTween(grain.intensity.value, intensity, new(duration, scale:IgnoreTimescale), x => grain.intensity.value = x), asyncToken, grain);
             else grain.intensity.value = intensity;
         }
-        private async UniTask ChangeSizeAsync(float size, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeSizeAsync(float size, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await sizeTweener.RunAwaitable(new FloatTween(grain.size.value, size, new(duration, scale:IgnoreTimescale), x => grain.size.value = x), asyncToken, grain);
+            if (duration > 0) await sizeTweener.Run(new FloatTween(grain.size.value, size, new(duration, scale:IgnoreTimescale), x => grain.size.value = x), asyncToken, grain);
             else grain.size.value = size;
         }
-        private async UniTask ChangeLuminanceContributionAsync(float luminanceContribution, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeLuminanceContributionAsync(float luminanceContribution, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await luminanceContributionTweener.RunAwaitable(new FloatTween(grain.lumContrib.value, luminanceContribution, new(duration, scale:IgnoreTimescale), x => grain.lumContrib.value = x), asyncToken, grain);
+            if (duration > 0) await luminanceContributionTweener.Run(new FloatTween(grain.lumContrib.value, luminanceContribution, new(duration, scale:IgnoreTimescale), x => grain.lumContrib.value = x), asyncToken, grain);
             else grain.lumContrib.value = luminanceContribution;
         }
 

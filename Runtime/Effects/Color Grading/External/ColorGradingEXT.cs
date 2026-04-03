@@ -37,26 +37,26 @@ namespace NaninovelPostProcess {
 			LookUpTexture = parameters?.ElementAtOrDefault(2) ?? defaultLookUpTexture;
 			
 		}
-		public async UniTask AwaitSpawn(AsyncToken asyncToken = default)
+		public async Awaitable AwaitSpawn(AsyncToken asyncToken = default)
 		{
 			CompleteTweens();
 			var duration = asyncToken.Completed ? 0 : Duration;
 			await ChangeColorGradingAsync(duration, VolumeWeight, LookUpTexture, asyncToken);
 		}
 
-		public async UniTask ChangeColorGradingAsync(float duration, float volumeWeight, string lookUpTexture, AsyncToken asyncToken = default)
+		public async Awaitable ChangeColorGradingAsync(float duration, float volumeWeight, string lookUpTexture, AsyncToken asyncToken = default)
 		{
-			var tasks = new List<UniTask>();
+			var tasks = new List<Awaitable>();
 
 			if (Volume.weight != volumeWeight) tasks.Add(ChangeVolumeWeightAsync(volumeWeight, duration, asyncToken));
 			colorGrading.externalLut.value = ChangeTexture(lookUpTexture);
 			
-			await UniTask.WhenAll(tasks);
+			await Async.All(tasks);
 		}
 
 		protected override void CompleteTweens()
 		{
-			if(volumeWeightTweener.Running) volumeWeightTweener.CompleteInstantly();
+			if(volumeWeightTweener.Running) volumeWeightTweener.Complete();
 		}
 
 		protected override void Awake()

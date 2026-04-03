@@ -47,31 +47,31 @@ namespace NaninovelPostProcess {
 			MaxBlurSize = parameters?.ElementAtOrDefault(5)?.ToString() ?? defaultMaxBlurSize.ToString();
 		}
 
-		public async UniTask AwaitSpawn(AsyncToken asyncToken = default)
+		public async Awaitable AwaitSpawn(AsyncToken asyncToken = default)
 		{
 			CompleteTweens();
 			var duration = asyncToken.Completed ? 0 : Duration;
 			await ChangeDoFAsync(duration, VolumeWeight, FocusDistance, FocalLength, Aperture, MaxBlurSize, asyncToken);
 		}
 
-		public async UniTask ChangeDoFAsync(float duration, float volumeWeight, float focusDistance, float focalLength, float aperture, string blursize, AsyncToken asyncToken = default)
+		public async Awaitable ChangeDoFAsync(float duration, float volumeWeight, float focusDistance, float focalLength, float aperture, string blursize, AsyncToken asyncToken = default)
 		{
-			var tasks = new List<UniTask>();
+			var tasks = new List<Awaitable>();
 			if (Volume.weight != volumeWeight) tasks.Add(ChangeVolumeWeightAsync(volumeWeight, duration, asyncToken));
 			if (dof.focusDistance.value != focusDistance) tasks.Add(ChangeFocusDistanceAsync(focusDistance, duration, asyncToken));
 			if (dof.aperture.value != aperture) tasks.Add(ChangeApertureAsync(aperture, duration, asyncToken));
 			if (dof.focalLength.value != focalLength) tasks.Add(ChangeFocalLengthAsync(focalLength, duration, asyncToken));
 			dof.kernelSize.value = (KernelSize)System.Enum.Parse(typeof(KernelSize), blursize);
 
-			await UniTask.WhenAll(tasks);
+			await Async.All(tasks);
 		}
 
 		protected override void CompleteTweens()
 		{
-			if (focusDistanceTweener.Running) focusDistanceTweener.CompleteInstantly();
-			if (apertureTweener.Running) apertureTweener.CompleteInstantly();
-			if (focalLengthTweener.Running) focalLengthTweener.CompleteInstantly();
-			if (volumeWeightTweener.Running) volumeWeightTweener.CompleteInstantly();
+			if (focusDistanceTweener.Running) focusDistanceTweener.Complete();
+			if (apertureTweener.Running) apertureTweener.Complete();
+			if (focalLengthTweener.Running) focalLengthTweener.Complete();
+			if (volumeWeightTweener.Running) volumeWeightTweener.Complete();
 		}
 		protected override void Awake()
 		{
@@ -80,19 +80,19 @@ namespace NaninovelPostProcess {
 			dof.SetAllOverridesTo(true);
 		}
 
-		private async UniTask ChangeFocusDistanceAsync(float focusDistance, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeFocusDistanceAsync(float focusDistance, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await focusDistanceTweener.RunAwaitable(new FloatTween(dof.focusDistance.value, focusDistance, new(duration, scale:IgnoreTimescale), x => dof.focusDistance.value = x), asyncToken, dof);
+			if (duration > 0) await focusDistanceTweener.Run(new FloatTween(dof.focusDistance.value, focusDistance, new(duration, scale:IgnoreTimescale), x => dof.focusDistance.value = x), asyncToken, dof);
 			else dof.focusDistance.value = focusDistance;
 		}
-		private async UniTask ChangeApertureAsync(float aperture, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeApertureAsync(float aperture, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await apertureTweener.RunAwaitable(new FloatTween(dof.aperture.value, aperture, new(duration, scale:IgnoreTimescale), x => dof.aperture.value = x), asyncToken, dof);
+			if (duration > 0) await apertureTweener.Run(new FloatTween(dof.aperture.value, aperture, new(duration, scale:IgnoreTimescale), x => dof.aperture.value = x), asyncToken, dof);
 			else dof.aperture.value = aperture;
 		}
-		private async UniTask ChangeFocalLengthAsync(float focalLength, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeFocalLengthAsync(float focalLength, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await focalLengthTweener.RunAwaitable(new FloatTween(dof.focalLength.value, focalLength, new(duration, scale:IgnoreTimescale), x => dof.focalLength.value = x), asyncToken, dof);
+			if (duration > 0) await focalLengthTweener.Run(new FloatTween(dof.focalLength.value, focalLength, new(duration, scale:IgnoreTimescale), x => dof.focalLength.value = x), asyncToken, dof);
 			else dof.focalLength.value = focalLength;
 		}
 

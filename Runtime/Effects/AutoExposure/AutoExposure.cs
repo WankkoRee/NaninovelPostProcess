@@ -62,16 +62,16 @@ namespace NaninovelPostProcess
 			}
 		}
 
-		public async UniTask AwaitSpawn(AsyncToken asyncToken = default)
+		public async Awaitable AwaitSpawn(AsyncToken asyncToken = default)
 		{
 			CompleteTweens();
 			var duration = asyncToken.Completed ? 0 : Duration;
 			await ChangeAutoExposureAsync(duration, VolumeWeight, Filtering, Minimum,  Maximum, ExposureCompensation, Type, SpeedUp, SpeedDown, asyncToken);
 		}
 
-		public async UniTask ChangeAutoExposureAsync(float duration, float volumeWeight, Vector2 filtering, float minimum, float maximum, float exposureCompensation, string type, float speedUp, float speedDown, AsyncToken asyncToken = default)
+		public async Awaitable ChangeAutoExposureAsync(float duration, float volumeWeight, Vector2 filtering, float minimum, float maximum, float exposureCompensation, string type, float speedUp, float speedDown, AsyncToken asyncToken = default)
 		{
-			var tasks = new List<UniTask>();
+			var tasks = new List<Awaitable>();
 			if (Volume.weight != volumeWeight) tasks.Add(ChangeVolumeWeightAsync(volumeWeight, duration, asyncToken));
 			if (autoExposure.filtering.value != filtering) tasks.Add(ChangeFilteringAsync(filtering, duration, asyncToken));
 			if (autoExposure.minLuminance.value != minimum) tasks.Add(ChangeMinimumAsync(minimum, duration, asyncToken));
@@ -84,18 +84,18 @@ namespace NaninovelPostProcess
 				if (autoExposure.speedDown.value != speedDown) tasks.Add(ChangeSpeedDownAsync(speedDown, duration, asyncToken));
 			}
 
-			await UniTask.WhenAll(tasks);
+			await Async.All(tasks);
 		}
 
 		protected override void CompleteTweens()
 		{
-			if (volumeWeightTweener.Running) volumeWeightTweener.CompleteInstantly();
-			if (filteringTweener.Running) filteringTweener.CompleteInstantly();
-			if (minimumTweener.Running) minimumTweener.CompleteInstantly();
-			if (maximumTweener.Running) maximumTweener.CompleteInstantly();
-			if (exposureCompensationTweener.Running) exposureCompensationTweener.CompleteInstantly();
-			if (speedUpTweener.Running) speedUpTweener.CompleteInstantly();
-			if (speedDownTweener.Running) speedDownTweener.CompleteInstantly();
+			if (volumeWeightTweener.Running) volumeWeightTweener.Complete();
+			if (filteringTweener.Running) filteringTweener.Complete();
+			if (minimumTweener.Running) minimumTweener.Complete();
+			if (maximumTweener.Running) maximumTweener.Complete();
+			if (exposureCompensationTweener.Running) exposureCompensationTweener.Complete();
+			if (speedUpTweener.Running) speedUpTweener.Complete();
+			if (speedDownTweener.Running) speedDownTweener.Complete();
 		}
 
 		protected override void Awake()
@@ -105,34 +105,34 @@ namespace NaninovelPostProcess
 			autoExposure.SetAllOverridesTo(true);
 		}
 
-		private async UniTask ChangeFilteringAsync(Vector2 filtering, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeFilteringAsync(Vector2 filtering, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await filteringTweener.RunAwaitable(new VectorTween(autoExposure.filtering.value, filtering, new(duration, scale:IgnoreTimescale), x => autoExposure.filtering.value = x), asyncToken, autoExposure);
+			if (duration > 0) await filteringTweener.Run(new VectorTween(autoExposure.filtering.value, filtering, new(duration, scale:IgnoreTimescale), x => autoExposure.filtering.value = x), asyncToken, autoExposure);
 			else autoExposure.filtering.value = filtering;
 		}
-		private async UniTask ChangeMinimumAsync(float minimum, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeMinimumAsync(float minimum, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await minimumTweener.RunAwaitable(new FloatTween(autoExposure.minLuminance.value, minimum, new(duration, scale:IgnoreTimescale), x => autoExposure.minLuminance.value = x), asyncToken, autoExposure);
+			if (duration > 0) await minimumTweener.Run(new FloatTween(autoExposure.minLuminance.value, minimum, new(duration, scale:IgnoreTimescale), x => autoExposure.minLuminance.value = x), asyncToken, autoExposure);
 			else autoExposure.minLuminance.value = minimum;
 		}
-		private async UniTask ChangeMaximumAsync(float maximum, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeMaximumAsync(float maximum, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await maximumTweener.RunAwaitable(new FloatTween(autoExposure.maxLuminance.value, maximum, new(duration, scale:IgnoreTimescale), x => autoExposure.maxLuminance.value = x), asyncToken, autoExposure);
+			if (duration > 0) await maximumTweener.Run(new FloatTween(autoExposure.maxLuminance.value, maximum, new(duration, scale:IgnoreTimescale), x => autoExposure.maxLuminance.value = x), asyncToken, autoExposure);
 			else autoExposure.maxLuminance.value = maximum;
 		}
-		private async UniTask ChangeExposureCompensationAsync(float exposureCompensation, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeExposureCompensationAsync(float exposureCompensation, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await exposureCompensationTweener.RunAwaitable(new FloatTween(autoExposure.keyValue.value, exposureCompensation, new(duration, scale:IgnoreTimescale), x => autoExposure.keyValue.value = x), asyncToken, autoExposure);
+			if (duration > 0) await exposureCompensationTweener.Run(new FloatTween(autoExposure.keyValue.value, exposureCompensation, new(duration, scale:IgnoreTimescale), x => autoExposure.keyValue.value = x), asyncToken, autoExposure);
 			else autoExposure.keyValue.value = exposureCompensation;
 		}
-		private async UniTask ChangeSpeedUpAsync(float speedUp, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeSpeedUpAsync(float speedUp, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await speedUpTweener.RunAwaitable(new FloatTween(autoExposure.speedUp.value, speedUp, new(duration, scale:IgnoreTimescale), x => autoExposure.speedUp.value = x), asyncToken, autoExposure);
+			if (duration > 0) await speedUpTweener.Run(new FloatTween(autoExposure.speedUp.value, speedUp, new(duration, scale:IgnoreTimescale), x => autoExposure.speedUp.value = x), asyncToken, autoExposure);
 			else autoExposure.speedUp.value = speedUp;
 		}
-		private async UniTask ChangeSpeedDownAsync(float anamorphicRatio, float duration, AsyncToken asyncToken = default)
+		private async Awaitable ChangeSpeedDownAsync(float anamorphicRatio, float duration, AsyncToken asyncToken = default)
 		{
-			if (duration > 0) await speedDownTweener.RunAwaitable(new FloatTween(autoExposure.speedDown.value, anamorphicRatio, new(duration, scale:IgnoreTimescale), x => autoExposure.speedDown.value = x), asyncToken, autoExposure);
+			if (duration > 0) await speedDownTweener.Run(new FloatTween(autoExposure.speedDown.value, anamorphicRatio, new(duration, scale:IgnoreTimescale), x => autoExposure.speedDown.value = x), asyncToken, autoExposure);
 			else autoExposure.speedDown.value = anamorphicRatio;
 		}
 

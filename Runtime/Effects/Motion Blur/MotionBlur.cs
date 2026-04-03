@@ -39,28 +39,28 @@ namespace NaninovelPostProcess {
             SampleCount = parameters?.ElementAtOrDefault(2)?.AsInvariantFloat() ?? defaultSampleCount;
         }
 
-        public async UniTask AwaitSpawn(AsyncToken asyncToken = default)
+        public async Awaitable AwaitSpawn(AsyncToken asyncToken = default)
         {
             CompleteTweens();
             var duration = asyncToken.Completed ? 0 : Duration;
             await ChangeDoFAsync(duration, VolumeWeight, ShutterAngle, SampleCount, asyncToken);
         }
 
-        public async UniTask ChangeDoFAsync(float duration, float volumeWeight, float focusDistance, float focalLength, AsyncToken asyncToken = default)
+        public async Awaitable ChangeDoFAsync(float duration, float volumeWeight, float focusDistance, float focalLength, AsyncToken asyncToken = default)
         {
-            var tasks = new List<UniTask>();
+            var tasks = new List<Awaitable>();
             if (Volume.weight != volumeWeight) tasks.Add(ChangeVolumeWeightAsync(volumeWeight, duration, asyncToken));
             if (motionBlur.shutterAngle.value != focusDistance) tasks.Add(ChangeShutterAngleAsync(focusDistance, duration, asyncToken));
             if (motionBlur.sampleCount.value != focalLength) tasks.Add(ChangeSampleCountAsync(focalLength, duration, asyncToken));
 
-            await UniTask.WhenAll(tasks);
+            await Async.All(tasks);
         }
 
         protected override void CompleteTweens()
         {
-            if (shutterAngleTweener.Running) shutterAngleTweener.CompleteInstantly();
-            if (sampleCountTweener.Running) sampleCountTweener.CompleteInstantly();
-            if (volumeWeightTweener.Running) volumeWeightTweener.CompleteInstantly();
+            if (shutterAngleTweener.Running) shutterAngleTweener.Complete();
+            if (sampleCountTweener.Running) sampleCountTweener.Complete();
+            if (volumeWeightTweener.Running) volumeWeightTweener.Complete();
         }
 
         protected override void Awake()
@@ -69,16 +69,16 @@ namespace NaninovelPostProcess {
             motionBlur = Volume.profile.GetSetting<UnityEngine.Rendering.PostProcessing.MotionBlur>() ?? Volume.profile.AddSettings<UnityEngine.Rendering.PostProcessing.MotionBlur>();
             motionBlur.SetAllOverridesTo(true);
         }
-        private async UniTask ChangeShutterAngleAsync(float shutterAngle, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeShutterAngleAsync(float shutterAngle, float duration, AsyncToken asyncToken = default)
         {
 
-            if (duration > 0) await shutterAngleTweener.RunAwaitable(new FloatTween(motionBlur.shutterAngle.value, shutterAngle, new(duration, scale:IgnoreTimescale), x => motionBlur.shutterAngle.value = x), asyncToken, motionBlur);
+            if (duration > 0) await shutterAngleTweener.Run(new FloatTween(motionBlur.shutterAngle.value, shutterAngle, new(duration, scale:IgnoreTimescale), x => motionBlur.shutterAngle.value = x), asyncToken, motionBlur);
             else motionBlur.shutterAngle.value = shutterAngle;
         }
-        private async UniTask ChangeSampleCountAsync(float sampleCount, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeSampleCountAsync(float sampleCount, float duration, AsyncToken asyncToken = default)
         {
 
-            if (duration > 0) await sampleCountTweener.RunAwaitable(new FloatTween((int)motionBlur.sampleCount.value, sampleCount, new(duration, scale:IgnoreTimescale), x => motionBlur.sampleCount.value = (int)x), asyncToken, motionBlur);
+            if (duration > 0) await sampleCountTweener.Run(new FloatTween((int)motionBlur.sampleCount.value, sampleCount, new(duration, scale:IgnoreTimescale), x => motionBlur.sampleCount.value = (int)x), asyncToken, motionBlur);
             else motionBlur.sampleCount.value = (int)sampleCount;
         }
 #if NANINOVEL_SCENE_ASSISTANT_AVAILABLE

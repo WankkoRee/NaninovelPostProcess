@@ -75,16 +75,16 @@ namespace NaninovelPostProcess
             DirtIntensity = parameters?.ElementAtOrDefault(11)?.AsInvariantFloat() ?? defaultDirtIntensity;
         }
 
-        public async UniTask AwaitSpawn(AsyncToken asyncToken = default)
+        public async Awaitable AwaitSpawn(AsyncToken asyncToken = default)
         {
             CompleteTweens();
             var duration = asyncToken.Completed ? 0 : Duration;
             await ChangeBloomAsync(duration, VolumeWeight, Intensity, Threshold,  SoftKnee, Clamp, Diffusion, AnamorphicRatio, BloomColor, FastMode, DirtTexture, DirtIntensity, asyncToken);
         }
 
-        public async UniTask ChangeBloomAsync(float duration, float volumeWeight, float intensity, float threshold, float softKnee, float clamp, float diffusion, float anamorphicRatio, Color tint, bool fastMode, string dirtTexture, float dirtIntensity, AsyncToken asyncToken = default)
+        public async Awaitable ChangeBloomAsync(float duration, float volumeWeight, float intensity, float threshold, float softKnee, float clamp, float diffusion, float anamorphicRatio, Color tint, bool fastMode, string dirtTexture, float dirtIntensity, AsyncToken asyncToken = default)
         {
-            var tasks = new List<UniTask>();
+            var tasks = new List<Awaitable>();
             if (Volume.weight != volumeWeight) tasks.Add(ChangeVolumeWeightAsync(volumeWeight, duration, asyncToken));
             if (bloom.intensity.value != intensity) tasks.Add(ChangeIntensityAsync(intensity, duration, asyncToken));
             if (bloom.threshold.value != threshold) tasks.Add(ChangeThresholdAsync(threshold, duration, asyncToken));
@@ -97,20 +97,20 @@ namespace NaninovelPostProcess
             if (bloom.dirtIntensity.value != dirtIntensity) tasks.Add(ChangeDirtIntensityAsync(dirtIntensity, duration, asyncToken));
             bloom.fastMode.value = FastMode;
 
-            await UniTask.WhenAll(tasks);
+            await Async.All(tasks);
         }
 
         protected override void CompleteTweens()
         {
-            if (volumeWeightTweener.Running) volumeWeightTweener.CompleteInstantly();
-            if (intensityTweener.Running) intensityTweener.CompleteInstantly();
-            if (thresholdTweener.Running) thresholdTweener.CompleteInstantly();
-            if (softKneeTweener.Running) softKneeTweener.CompleteInstantly();
-            if (clampTweener.Running) clampTweener.CompleteInstantly();
-            if (diffusionTweener.Running) diffusionTweener.CompleteInstantly();
-            if (anamorphicRatioTweener.Running) anamorphicRatioTweener.CompleteInstantly();
-            if (tintTweener.Running) tintTweener.CompleteInstantly();
-            if (dirtIntensityTweener.Running) dirtIntensityTweener.CompleteInstantly();
+            if (volumeWeightTweener.Running) volumeWeightTweener.Complete();
+            if (intensityTweener.Running) intensityTweener.Complete();
+            if (thresholdTweener.Running) thresholdTweener.Complete();
+            if (softKneeTweener.Running) softKneeTweener.Complete();
+            if (clampTweener.Running) clampTweener.Complete();
+            if (diffusionTweener.Running) diffusionTweener.Complete();
+            if (anamorphicRatioTweener.Running) anamorphicRatioTweener.Complete();
+            if (tintTweener.Running) tintTweener.Complete();
+            if (dirtIntensityTweener.Running) dirtIntensityTweener.Complete();
         }
 
         protected override void Awake()
@@ -120,44 +120,44 @@ namespace NaninovelPostProcess
             bloom.SetAllOverridesTo(true);
         }
 
-        private async UniTask ChangeIntensityAsync(float intensity, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeIntensityAsync(float intensity, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await intensityTweener.RunAwaitable(new FloatTween(bloom.intensity.value, intensity, new(duration, scale:IgnoreTimescale), x => bloom.intensity.value = x), asyncToken, bloom);
+            if (duration > 0) await intensityTweener.Run(new FloatTween(bloom.intensity.value, intensity, new(duration, scale:IgnoreTimescale), x => bloom.intensity.value = x), asyncToken, bloom);
             else bloom.intensity.value = intensity;
         }
-        private async UniTask ChangeThresholdAsync(float threshold, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeThresholdAsync(float threshold, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await thresholdTweener.RunAwaitable(new FloatTween(bloom.threshold.value, threshold, new(duration, scale:IgnoreTimescale), x => bloom.threshold.value = x), asyncToken, bloom);
+            if (duration > 0) await thresholdTweener.Run(new FloatTween(bloom.threshold.value, threshold, new(duration, scale:IgnoreTimescale), x => bloom.threshold.value = x), asyncToken, bloom);
             else bloom.threshold.value = threshold;
         }
-        private async UniTask ChangeSoftKneeAsync(float softKnee, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeSoftKneeAsync(float softKnee, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await softKneeTweener.RunAwaitable(new FloatTween(bloom.softKnee.value, softKnee, new(duration, scale:IgnoreTimescale), x => bloom.softKnee.value = x), asyncToken, bloom);
+            if (duration > 0) await softKneeTweener.Run(new FloatTween(bloom.softKnee.value, softKnee, new(duration, scale:IgnoreTimescale), x => bloom.softKnee.value = x), asyncToken, bloom);
             else bloom.softKnee.value = softKnee;
         }
-        private async UniTask ChangeClampAsync(float clamp, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeClampAsync(float clamp, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await clampTweener.RunAwaitable(new FloatTween(bloom.clamp.value, clamp, new(duration, scale:IgnoreTimescale), x => bloom.clamp.value = x), asyncToken, bloom);
+            if (duration > 0) await clampTweener.Run(new FloatTween(bloom.clamp.value, clamp, new(duration, scale:IgnoreTimescale), x => bloom.clamp.value = x), asyncToken, bloom);
             else bloom.clamp.value = clamp;
         }
-        private async UniTask ChangeDiffusionAsync(float diffusion, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeDiffusionAsync(float diffusion, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await diffusionTweener.RunAwaitable(new FloatTween(bloom.diffusion.value, diffusion, new(duration, scale:IgnoreTimescale), x => bloom.diffusion.value = x), asyncToken, bloom);
+            if (duration > 0) await diffusionTweener.Run(new FloatTween(bloom.diffusion.value, diffusion, new(duration, scale:IgnoreTimescale), x => bloom.diffusion.value = x), asyncToken, bloom);
             else bloom.diffusion.value = diffusion;
         }
-        private async UniTask ChangeAnamorphicRatioAsync(float anamorphicRatio, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeAnamorphicRatioAsync(float anamorphicRatio, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await anamorphicRatioTweener.RunAwaitable(new FloatTween(bloom.anamorphicRatio.value, anamorphicRatio, new(duration, scale:IgnoreTimescale), x => bloom.anamorphicRatio.value = x), asyncToken, bloom);
+            if (duration > 0) await anamorphicRatioTweener.Run(new FloatTween(bloom.anamorphicRatio.value, anamorphicRatio, new(duration, scale:IgnoreTimescale), x => bloom.anamorphicRatio.value = x), asyncToken, bloom);
             else bloom.anamorphicRatio.value = anamorphicRatio;
         }
-        private async UniTask ChangeTintAsync(Color tint, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeTintAsync(Color tint, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await tintTweener.RunAwaitable(new ColorTween(bloom.color.value, tint, new(duration, scale:IgnoreTimescale), ColorTweenMode.All, x => bloom.color.value = x), asyncToken, bloom);
+            if (duration > 0) await tintTweener.Run(new ColorTween(bloom.color.value, tint, new(duration, scale:IgnoreTimescale), ColorTweenMode.All, x => bloom.color.value = x), asyncToken, bloom);
             else bloom.color.value = tint;
         }
-        private async UniTask ChangeDirtIntensityAsync(float dirtIntensity, float duration, AsyncToken asyncToken = default)
+        private async Awaitable ChangeDirtIntensityAsync(float dirtIntensity, float duration, AsyncToken asyncToken = default)
         {
-            if (duration > 0) await dirtIntensityTweener.RunAwaitable(new FloatTween(bloom.dirtIntensity.value, dirtIntensity, new(duration, scale:IgnoreTimescale), x => bloom.dirtIntensity.value = x), asyncToken, bloom);
+            if (duration > 0) await dirtIntensityTweener.Run(new FloatTween(bloom.dirtIntensity.value, dirtIntensity, new(duration, scale:IgnoreTimescale), x => bloom.dirtIntensity.value = x), asyncToken, bloom);
             else bloom.dirtIntensity.value = dirtIntensity;
         }
         

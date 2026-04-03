@@ -1,5 +1,6 @@
 ﻿#if UNITY_POST_PROCESSING_STACK_V2
 using Naninovel;
+using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 
 
@@ -17,7 +18,7 @@ namespace NaninovelPostProcess
             this.cameraManager = cameraManager;
         }
 
-        public virtual UniTask InitializeService()
+        public virtual Awaitable InitializeService()
         {
             if (Configuration.AddPostProcessLayerToCamera)
             {
@@ -30,7 +31,7 @@ namespace NaninovelPostProcess
                 SetAntiAlias(layer);
             }
 
-            return UniTask.CompletedTask;
+            return Async.Completed;
         }
 
         private void SetAntiAlias(PostProcessLayer layer)
